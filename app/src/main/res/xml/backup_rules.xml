@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backup rules: exclude nothing yet (no sensitive stores exist); revisit when
+  Room DB + exposure ledger land in Phase 1 (ledger content is personal data —
+  likely excluded from cloud backup by default, per local-first policy).
+-->
+<full-backup-content />

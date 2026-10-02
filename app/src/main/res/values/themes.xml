@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Minimal neutral theme; Material You dynamic color arrives with the Phase 4
+      polish pass. Kept deliberately tiny so early screenshot diffs stay clean.
+    -->
+    <style name="Theme.Retarget" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>
