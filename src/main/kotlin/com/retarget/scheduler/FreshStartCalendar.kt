@@ -1,4 +1,4 @@
-package com.advertapp.scheduler
+package com.retarget.scheduler
 
 import java.time.DayOfWeek
 import java.time.LocalDate

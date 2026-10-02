@@ -1,6 +1,6 @@
-package com.advertapp.scheduler
+package com.retarget.scheduler
 
-import com.advertapp.creative.Channel
+import com.retarget.creative.Channel
 
 /**
  * Delivery budget enforcement — HARD limits live in code, not just settings.

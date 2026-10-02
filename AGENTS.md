@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guidance for AI agents and human contributors working on **advert-app**, an open source
+Guidance for AI agents and human contributors working on **retarget**, an open source
 Android application that lets users apply advertiser-style nudging techniques to their own
 goals and habits. Everything in this file applies to every contribution: code, docs,
 issues, commit messages, and pull request descriptions.
@@ -10,7 +10,7 @@ issues, commit messages, and pull request descriptions.
 - **What it is:** An Android app (Kotlin, Gradle) that borrows engagement and nudging
   techniques from the advertising industry and turns them toward user-chosen goals.
 - **License:** See [LICENSE](LICENSE). All contributions are made under that license.
-- **Repo:** https://github.com/jimspurgeon/advert-app
+- **Repo:** https://github.com/jimspurgeon/retarget
 - **Plan & workflow:** [DEVELOPMENT.md](DEVELOPMENT.md) is the canonical product plan,
   architecture, and branching strategy. **Read it before working on anything.**
 - **Evidence:** [docs/research/](docs/research/README.md) is the research library that

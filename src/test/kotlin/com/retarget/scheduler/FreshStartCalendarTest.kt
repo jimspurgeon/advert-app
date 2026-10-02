@@ -1,4 +1,4 @@
-package com.advertapp.scheduler
+package com.retarget.scheduler
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

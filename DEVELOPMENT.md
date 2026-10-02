@@ -1,13 +1,13 @@
-# advert-app Development Guide
+# retarget Development Guide
 
-This document is the canonical plan for building advert-app. Any agent (AI or human)
+This document is the canonical plan for building retarget. Any agent (AI or human)
 picking up work on this repo should read AGENTS.md first, then this file top to bottom.
 It is kept in the repo so the project is fully self-contained: the plan, the research,
 and the rules all live together.
 
 ## Vision
 
-**advert-app turns advertising's own toolbox against itself.** Advertisers have spent
+**retarget turns advertising's own toolbox against itself.** Advertisers have spent
 decades perfecting how to make things attractive, memorable, and top-of-mind. This app
 gives that entire toolkit — imagery, timing, repetition, emotional pairing — to the
 user, aimed at their *own* goals: hydration, whole-food eating, time in nature,
@@ -45,7 +45,7 @@ Room database, **no network permission in v1**.
 
 ```
 app/
-  src/main/kotlin/com/advertapp/app/
+  src/main/kotlin/com/retarget/app/
     goal/          # Goal, Campaign domain models + Room entities + DAOs
     creative/      # Creative, CreativePack, licensing metadata, rotation engine
     scheduler/     # Slot computation, budgets, cooldowns, fresh-start boosts
@@ -192,7 +192,7 @@ baseline for modern scheduling reliability), Gradle wrapper.
 ./gradlew test
 ```
 
-Repositories: GitHub `jimspurgeon/advert-app`. Issues and PRs only; no email patches.
+Repositories: GitHub `jimspurgeon/retarget`. Issues and PRs only; no email patches.
 
 ## Pre-registered decisions (do not silently change)
 

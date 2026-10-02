@@ -25,7 +25,7 @@ a consistent context for 12 weeks; automaticity followed an **asymptotic curve**
 median time to plateau ≈ **66 days** (range 18–254). Missing a single occasion did
 not materially derail formation. Complexity negatively predicted automaticity gains.
 
-**Implication:** Advert-app is a *long-game* companion, not a 30-day sprint app. UX
+**Implication:** Retarget is a *long-game* companion, not a 30-day sprint app. UX
 should celebrate "milestones" on realistic timelines, avoid implying habits form in
 21 days, and treat missed days gently (no punitive streak mechanics as default — see
 loss aversion guardrail below). Defaults should expect (and forgive) lapses.

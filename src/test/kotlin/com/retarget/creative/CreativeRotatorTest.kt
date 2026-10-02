@@ -1,4 +1,4 @@
-package com.advertapp.creative
+package com.retarget.creative
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

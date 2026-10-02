@@ -1,6 +1,6 @@
 # Research Index
 
-Annotated bibliography of the research that informs advert-app's design. Each entry
+Annotated bibliography of the research that informs retarget's design. Each entry
 includes practical takeaways for this project. Anyone (human or agent) proposing
 feature changes should check whether the research here supports or contradicts the idea.
 

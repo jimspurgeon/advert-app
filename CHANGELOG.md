@@ -18,3 +18,11 @@ All notable changes to this project are documented here. Format loosely follows
   `BudgetPolicy` (hard notification caps, quiet hours, dismissal cooldowns),
   `FreshStartCalendar` (temporal landmark boosts).
 - CI workflow (build + unit tests), PR template embedding review checklist.
+
+## [Unreleased] — Naming
+
+### Changed
+- **App renamed: advert-app → Retarget.** The name reclaims the ad-industry
+  practice of following you around the internet and aims it at your own goals.
+  Repo renamed to jimspurgeon/retarget (GitHub redirects old URLs). Package
+  namespace: com.retarget.*.

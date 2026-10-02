@@ -1,17 +1,17 @@
-# advert-app
+# Retarget
 
 **Turn advertising's own toolbox toward your goals.**
 
-Advertisers have spent decades — and billions — perfecting how to make things
-attractive, memorable, and impossible to forget. Bidirectional nudges in your
-pocket: your phone's wallpaper becomes a billboard *for the life you actually want*.
+You know how ads follow you around the internet — promoting someone else's goals?
+Retarget flips that: you're the advertiser now, and the product is the life you
+actually want. Your phone's wallpaper becomes a billboard *for your goals*.
 
 [![Phase: 0 — Foundation](https://img.shields.io/badge/phase-0%20Foundation-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 
 ## What it does
 
-Instead of renting your attention to ad networks, advert-app runs a **personal
+Instead of renting your attention to ad networks, Retarget runs a **personal
 advertising campaign for your own goals**:
 
 - 🖼️ **Wallpaper as billboard.** Your wallpaper rotates through curated, positively

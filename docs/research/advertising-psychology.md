@@ -1,7 +1,7 @@
 # Advertising Psychology — Core Persuasion & Branding Theory
 
 How advertisers build brand awareness and attractiveness, and how each technique maps
-to a self-nudge mechanism in advert-app.
+to a self-nudge mechanism in retarget.
 
 ## 1. Mere Exposure Effect (Zajonc, 1968)
 

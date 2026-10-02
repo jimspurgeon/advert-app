@@ -1,4 +1,4 @@
-package com.advertapp.creative
+package com.retarget.creative
 
 /**
  * A single advertisable "creative": an image paired with optional copy, organized
