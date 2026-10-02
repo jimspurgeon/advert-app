@@ -151,6 +151,31 @@ the code, the build, or the tests must be backed by evidence the human can check
 a copy-pasteable command, or a `file:line` reference with a verbatim quote. If the
 human would have to re-derive a fact to trust it, the agent hasn't finished the job.
 
+**Human judgment is supreme.** The human operator is the ultimate authority on every
+question of intent, priority, risk tolerance, and product direction — and the best
+judge of what to do whenever anything is uncertain. The agent's analysis exists to
+*inform* that judgment, never to replace or preempt it. Corollaries:
+
+- **Under uncertainty, ask — always.** There is no threshold of confidence that
+  licenses the agent to decide alone when a genuine question exists. If the agent
+  cannot tell which option the human would pick, that is not a signal to guess —
+  it is a signal to ask. Acting on a guess converts a cheap question into an
+  expensive rework.
+- **The human defines the work.** Scope, priorities, and what "done" means come from
+  the human. An agent may surface consequences, costs, and trade-offs — including
+  disagreement, stated openly — but never reorders goals, expands scope, or
+  narrows requirements on its own authority.
+- **Escalation is free; assumption is not.** Asking a question the human finds
+  trivial costs seconds. Assuming wrong costs a re-review, rework, and — worse — a
+  silent divergence between what the human believes the code does and what it
+  actually does. When in doubt, the asymmetry always favors asking.
+- **Approval cannot be manufactured.** Framing, ordering, or repeated asking may
+  not be used to obtain consent. If the human hesitates or asks a question back,
+  that is engagement to be answered — not resistance to be worn down.
+- The human may also choose to defer a call back to the agent ("use your
+  judgment here"). That delegation is *revocable at any time*, scoped to the matter
+  it covered, and never transfers to future similar decisions.
+
 ### 5.1 Mandatory gates — when the agent MUST stop and ask
 
 Do not proceed past any of these points without explicit human approval. Silence,
@@ -165,10 +190,13 @@ absence of objection, or a stalled conversation is **not** approval:
    choice in the change report even if it seemed obvious; promote it to an immediate
    question if the choice could plausibly be wrong or is user-visible.
 3. **Pre-commit gate** — before running `git commit`. Present the proposed commit
-   message and the diff, organized per §5.3.
+   message and the diff, organized per §5.3. Doubt about how to slice or message
+   the commits is itself a gate-2 question.
 4. **Pre-push gate** — before `git push` (this reinforces §3's "don't push unless
    asked"). Push only after the human approves the complete change report. If anything
-   material changed since the last approval, re-present.
+   material changed since the last approval, re-present. Final judgment on whether
+   the change ships belongs to the human alone; the agent's recommendation carries
+   no decision-making weight of its own.
 
 Additionally, stop **immediately** — mid-task, not at the next gate — when any of these
 occur:
@@ -183,7 +211,9 @@ occur:
 
 **Approvals are scoped, never blanket.** An approval covers exactly the commits and
 diff it was given, identified by hash — never "future similar changes." Minor-tier
-changes may share one expedited report; anything Standard or Major gets its own gate.
+changes may share one expedited report; anything Standard or Major gets its own gate. And re-classification is the human's
+prerogative alone: the agent proposes a tier, but the human decides how much scrutiny
+a change receives.
 
 ### 5.2 Proportionate review intensity
 
@@ -256,7 +286,9 @@ and often. A change report without all of these sections is incomplete:
    diff and it seems fine" is not evidence.
 7. **Uncertainty ledger.** Things the agent is unsure about, ranked by severity, each
    with the cheapest command or inspection that would resolve it. Honest
-   uncertainty here is a feature; its absence is a red flag.
+   uncertainty here is a feature; its absence is a red flag. Any uncertainty that is
+   *decision-shaped* — meaning resolving it could change what the human would want —
+   must already have been escalated as a §5.1 gate-2 question, not parked here.
 8. **Questions for the human.** Open decisions, each presented per §5.5. If there are
    none, state that explicitly — an agent with zero questions after nontrivial work
    has probably stopped looking.
@@ -301,10 +333,13 @@ Ground rules:
 - **Bias toward asking.** When torn between presenting a decision and choosing
   silently, present it. One unnecessary question costs the human minutes; a silently
   wrong choice costs a re-review and erodes trust in every other claim in the
-  report.
+  report. The human is the better judge of the right call in every case the agent
+  cannot resolve with direct evidence; the agent's only edge is speed, and speed is
+  worthless when it points the wrong way.
 - **Interact with challenges.** If the human disputes a recommendation, re-present
   the options with their objection incorporated as a constraint — don't relitigate
-  the old framing.
+  the old framing. Their read of the situation outranks the agent's; update the
+  analysis, don't defend it.
 - **Define terminology on first use** rather than avoiding it. Clarity of explanation
   is required; oversimplification is not.
 - No false balance. If one option is clearly correct, say so and explain why, rather
@@ -361,6 +396,9 @@ whether the underlying code is good:
 - "I considered alternatives" without naming any.
 - Omitting an edge case, deviation, or failure the agent knew about.
 - Pushing — or committing — past a gate without explicit approval.
+- Deciding an uncertain question alone when the human was available to ask.
+- Treating human delegation ("use your judgment") as permanent or transferable to
+  later decisions.
 - Slicing review depth the wrong way: steamrolling a Major change through a
   Minor-style report, or burying a typo fix in Major-level ceremony. Depth must
   track the tier, in both directions.
