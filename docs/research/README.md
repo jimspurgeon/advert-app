@@ -11,6 +11,7 @@ feature changes should check whether the research here supports or contradicts t
 - [interruption-timing.md](interruption-timing.md) — When/where to deliver prompts
 - [imagery-domains.md](imagery-domains.md) — Domain-specific evidence (hydration, plants, nature)
 - [digital-wellbeing.md](digital-wellbeing.md) — Avoiding notification fatigue / the backfire risk
+- [tone-guide.md](tone-guide.md) — Copy patterns & guardrails for all preset messages
 - [android-platform.md](android-platform.md) — Platform capabilities and constraints
 - [references.bib](references.bib) — BibTeX for all citations
 
