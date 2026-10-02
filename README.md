@@ -30,12 +30,12 @@ paced to stay pleasant — never nagging. See
 
 ## Status
 
-**Phase 0 — Foundation.** Planning, research, and scaffolding are underway. The
-roadmap lives in [DEVELOPMENT.md](DEVELOPMENT.md#feature-phases).
+**Phase 0 — Foundation.** The Gradle build, app skeleton, and CI pipeline now
+exist and pass (see [DEVELOPMENT.md](DEVELOPMENT.md#feature-phases) for the roadmap).
 
 | Phase | Theme | Status |
 |---|---|---|
-| 0 | Foundation (repo, CI, docs) | 🚧 In progress |
+| 0 | Foundation (repo, CI, docs) | 🚧 Near-complete — build green, tagging v0.1.0 pending |
 | 1 | MVP "The Billboard" (wallpaper engine) | Planned |
 | 2 | "The Campaign" (notifications + scheduler) | Planned |
 | 3 | "The Agency" (adaptivity, widgets, bundles) | Planned |

@@ -18,11 +18,22 @@ All notable changes to this project are documented here. Format loosely follows
   `BudgetPolicy` (hard notification caps, quiet hours, dismissal cooldowns),
   `FreshStartCalendar` (temporal landmark boosts).
 - CI workflow (build + unit tests), PR template embedding review checklist.
-
-## [Unreleased] — Naming
+- Gradle build skeleton: wrapper, settings, version catalog, app module with
+  Compose shell, Hilt DI wiring, ktlint/detekt config, local.properties template.
+- Phase 0 MVP: APK built successfully, 14 tests pass, linters green; core bugs
+  fixed (CreativeRotator decay inverted, quiet-hour logic broken).
 
 ### Changed
 - **App renamed: advert-app → Retarget.** The name reclaims the ad-industry
   practice of following you around the internet and aims it at your own goals.
   Repo renamed to jimspurgeon/retarget (GitHub redirects old URLs). Package
   namespace: com.retarget.*.
+
+### Fixed
+- `CreativeRotator.score`: previously scored *never-shown* creatives lowest
+  (exponential decay on infinity) and never recovered — fixed to use rest-recovery
+  curve (0 → 1 with half-life 72h); cumulative wear penalty added.
+- `BudgetPolicy.isQuietHour`: both branches identical, making *every* hour quiet;
+  fixed to correctly handle same-day vs. wrapping windows.
+- `BudgetPolicy.canDeliver`: self-referencing hardMax (compile error); fixed to
+  coerce override ≤ channel-hard-max.

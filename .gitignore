@@ -2,7 +2,7 @@
 .gradle/
 build/
 
-# Local configuration file (sdk path, etc)
+# Local configuration file (sdk path, etc) — commit only the .template
 local.properties
 
 # Log/OS Files

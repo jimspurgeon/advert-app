@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Retarget</string>
+    <string name="screen_dashboard_title">Your campaign</string>
+    <string name="dashboard_tagline">Ads for the life you actually want.</string>
+    <string name="dashboard_placeholder_body">
+        Phase 1 is on the way: your wallpaper becomes a billboard for your goals.
+        The engine behind it (fatigue-aware rotation, budgets, quiet hours) is
+        already built and tested.
+    </string>
+</resources>

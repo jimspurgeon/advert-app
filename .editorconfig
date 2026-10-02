@@ -1,0 +1,6 @@
+# ktlint code style configuration (https://pinterest.github.io/ktlint/)
+root = true
+
+[*.{kt,kts}]
+# Composable functions are PascalCase by Compose convention; don't flag them.
+ktlint_function_naming_ignore_when_annotated_with=Composable
