@@ -141,7 +141,8 @@ These rules govern how any AI agent working in this repository reports its chang
 seeks approval. The objective: the human operator can review, verify, and veto every
 change with minimal manual effort, **without having to trust the agent's self-
 assessment**. The human is the reviewer of record. The agent proposes; the human
-disposes.
+disposes. Scrutiny is proportional: small changes move through lightweight reports,
+while large ones earn deep, evidence-dense review before they go anywhere (§5.2).
 
 **Prime directive.** An agent's job is to reduce the human's review workload by
 collecting and presenting evidence — not to substitute its own judgment for the
@@ -158,13 +159,13 @@ absence of objection, or a stalled conversation is **not** approval:
 1. **Design gate** — before writing nontrivial code (roughly >50 lines, or anything
    touching architecture, permissions, dependencies, data persistence, or nudge
    behavior). Present the problem, the options considered, and a recommendation, per
-   §5.4 below. Iterate here; code is cheaper to rewrite before it exists.
+   §5.5 below. Iterate here; code is cheaper to rewrite before it exists.
 2. **Edge-case gate** — the moment the agent notices an ambiguous requirement or an
    unhandled edge case and chooses a behavior on the human's behalf. Report every such
    choice in the change report even if it seemed obvious; promote it to an immediate
    question if the choice could plausibly be wrong or is user-visible.
 3. **Pre-commit gate** — before running `git commit`. Present the proposed commit
-   message and the diff, organized per §5.2.
+   message and the diff, organized per §5.3.
 4. **Pre-push gate** — before `git push` (this reinforces §3's "don't push unless
    asked"). Push only after the human approves the complete change report. If anything
    material changed since the last approval, re-present.
@@ -180,7 +181,52 @@ occur:
 - The agent realizes something it previously told the human was inaccurate. Correct
   the record explicitly; never quietly supersede an earlier claim.
 
-### 5.2 The change report (required at the pre-commit and pre-push gates)
+**Approvals are scoped, never blanket.** An approval covers exactly the commits and
+diff it was given, identified by hash — never "future similar changes." Minor-tier
+changes may share one expedited report; anything Standard or Major gets its own gate.
+
+### 5.2 Proportionate review intensity
+
+Every gate in §5.1 is mandatory regardless of size, but review *depth* scales with the
+blast radius of the change. Classify the change before reporting it, state the
+classification and its justification, and let the human re-classify at will — in
+particular upward:
+
+- **Minor** — typo, comment, or doc-only fixes, formatting, resource-string
+  additions, or a logic change under ~20 LoC whose blast radius is contained to
+  itself. Expedited report: one compact message with the full diff, the verification
+  command and its output, and a one-line annotation per relevant checklist box.
+  Small is not exempt from the gates — just cheap to review.
+- **Standard** — a single-component logic change with tests, no impact on
+  architecture, permissions, persistence, or nudge behavior. Full change report
+  per §5.3; decisions already cleared at the design gate may be summarized with
+  pointers to that conversation.
+- **Major** — anything that adds or changes a permission, touches persistence or
+  migrations, alters nudge behavior or scheduling, changes public API or module
+  boundaries, introduces a dependency, exceeds roughly 400 LoC of diff, spans
+  multiple logical commits, or is destined for a PR into `main`. Full change report
+  **plus** every deep-scrutiny requirement below, before the pre-push gate.
+
+Deep-scrutiny requirements for Major changes (all required):
+
+- **Per-commit walkthrough.** Each commit gets its own verification evidence and an
+  explicit statement of what a reviewer should check in *that* commit — no "see the
+  diff."
+- **Adversarial self-review.** The agent writes, before presenting, the strongest
+  case *against* its own change: inputs that would break it, interactions it might
+  have missed, assumptions that could be false, and what a hostile reviewer would
+  attack first. Included in the report verbatim — the human decides how much weight
+  it deserves.
+- **Judgement-call cadence.** At least one §5.5-format decision per logical
+  component. If none surfaced, the agent has either stopped looking or the change is
+  more mechanical than it appears — say which, and defend it.
+- **Review kit.** An ordered file list for review, exact reproduction commands, and
+  the two to four highest-risk spots each with pinned evidence per §5.6, so the human
+  can verify the risky parts first and skim the rest.
+
+When torn between tiers, round up and let the human round down.
+
+### 5.3 The change report (required at the pre-commit and pre-push gates)
 
 Gates 3 and 4 use the same artifact, built incrementally so the human can review early
 and often. A change report without all of these sections is incomplete:
@@ -190,10 +236,10 @@ and often. A change report without all of these sections is incomplete:
    buried in the diff.
 2. **Commit map.** For each commit: hash, message, files changed with
    insertions/deletions, and one sentence of intent. Commits must isolate logical
-   changes (see §5.5) so the human can approve or reject them independently.
+   changes (see §5.6) so the human can approve or reject them independently.
 3. **Design decisions.** Every point where the agent chose among alternatives during
    implementation — library choices, API shapes, data structures, naming, ordering,
-   defaults. For each: the options, the chosen one, and why, in the §5.4 format.
+   defaults. For each: the options, the chosen one, and why, in the §5.5 format.
    Decisions already cleared at the design gate may be summarized with a pointer to
    that conversation.
 4. **Edge cases.** A numbered list. For each: (a) the triggering condition, stated
@@ -211,11 +257,11 @@ and often. A change report without all of these sections is incomplete:
 7. **Uncertainty ledger.** Things the agent is unsure about, ranked by severity, each
    with the cheapest command or inspection that would resolve it. Honest
    uncertainty here is a feature; its absence is a red flag.
-8. **Questions for the human.** Open decisions, each presented per §5.4. If there are
+8. **Questions for the human.** Open decisions, each presented per §5.5. If there are
    none, state that explicitly — an agent with zero questions after nontrivial work
    has probably stopped looking.
 
-### 5.3 Evidence rules
+### 5.4 Evidence rules
 
 - **Quote the codebase.** Support every nontrivial claim about the code with the file
   path, line numbers, and a verbatim excerpt. Never describe code the human needs to
@@ -233,7 +279,7 @@ and often. A change report without all of these sections is incomplete:
 - **Anchor to commits.** When describing the state of the repo, reference commit
   hashes so statements survive subsequent changes.
 
-### 5.4 Presenting options and reasoning
+### 5.5 Presenting options and reasoning
 
 For every decision submitted to the human (design gate, edge-case gate, or open
 question in the report), use this format:
@@ -252,6 +298,15 @@ Ground rules:
 
 - Never present exactly one option unless no alternative genuinely exists — and then
   say so explicitly, so the human knows it's exhaustive rather than lazy.
+- **Bias toward asking.** When torn between presenting a decision and choosing
+  silently, present it. One unnecessary question costs the human minutes; a silently
+  wrong choice costs a re-review and erodes trust in every other claim in the
+  report.
+- **Interact with challenges.** If the human disputes a recommendation, re-present
+  the options with their objection incorporated as a constraint — don't relitigate
+  the old framing.
+- **Define terminology on first use** rather than avoiding it. Clarity of explanation
+  is required; oversimplification is not.
 - No false balance. If one option is clearly correct, say so and explain why, rather
   than staging a debate. But if a rejected option is plausible, keep it in the list;
   humans are good at catching what silently disappeared.
@@ -266,7 +321,7 @@ Ground rules:
 - Present the human with the strongest version of each option, steelmanned — not
   strawmen set up to make the recommendation obvious.
 
-### 5.5 Minimizing the human's verification workload
+### 5.6 Minimizing the human's verification workload
 
 The agent bears the cost of making review cheap:
 
@@ -293,7 +348,7 @@ The agent bears the cost of making review cheap:
 - **Offer to split.** If the report reveals the change is bigger than one review can
   comfortably hold, propose splitting the branch before the push rather than after.
 
-### 5.6 Anti-patterns (automatic grounds for rejection)
+### 5.7 Anti-patterns (automatic grounds for rejection)
 
 An agent doing any of the following has failed the review process, regardless of
 whether the underlying code is good:
@@ -306,6 +361,9 @@ whether the underlying code is good:
 - "I considered alternatives" without naming any.
 - Omitting an edge case, deviation, or failure the agent knew about.
 - Pushing — or committing — past a gate without explicit approval.
+- Slicing review depth the wrong way: steamrolling a Major change through a
+  Minor-style report, or burying a typo fix in Major-level ceremony. Depth must
+  track the tier, in both directions.
 - Applying social pressure to the operator ("this is probably fine to push",
   repeated re-asking after a rejection). The gates exist to be used.
 
@@ -323,7 +381,7 @@ whether the underlying code is good:
 - [ ] Commit message and PR description follow conventions; docs updated.
 - [ ] Nothing references private information about anyone, including from
       outside the repo (issue text, screenshots, fixture data).
-- [ ] Change report (§5.2) presented with per-item evidence for each box above —
+- [ ] Change report (§5.3) presented with per-item evidence for each box above —
       a bare checkmark is not a completed checklist.
 
 When in doubt about whether something belongs in a public commit: **it doesn't.**
