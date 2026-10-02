@@ -4,7 +4,11 @@ All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versioning is SemVer-ish
 (`vMAJOR.MINOR.PATCH` — see DEVELOPMENT.md).
 
-## [Unreleased]
+## [v0.1.0] - 2026-10-02
+
+### Phase 0 — Foundation complete
+
+First tagged snapshot: repo, docs, build, CI, and domain skeletons.
 
 ### Added
 - AGENTS.md: contributor + AI-agent rules (security, ethics, collaboration, Android

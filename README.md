@@ -35,7 +35,7 @@ exist and pass (see [DEVELOPMENT.md](DEVELOPMENT.md#feature-phases) for the road
 
 | Phase | Theme | Status |
 |---|---|---|
-| 0 | Foundation (repo, CI, docs) | 🚧 Near-complete — build green, tagging v0.1.0 pending |
+| 0 | Foundation (repo, CI, docs) | ✅ Complete — v0.1.0 released |
 | 1 | MVP "The Billboard" (wallpaper engine) | Planned |
 | 2 | "The Campaign" (notifications + scheduler) | Planned |
 | 3 | "The Agency" (adaptivity, widgets, bundles) | Planned |
