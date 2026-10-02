@@ -1,8 +1,8 @@
 # AGENTS.md
 
 Guidance for AI agents and human contributors working on **retarget**, an open source
-Android application that lets users apply advertiser-style nudging techniques to their own
-goals and habits. Everything in this file applies to every contribution: code, docs,
+Android application that lets users apply advertiser-style nudging techniques to their
+own goals and habits. Everything in this file applies to every contribution: code, docs,
 issues, commit messages, and pull request descriptions.
 
 ## Project Overview
@@ -19,6 +19,40 @@ issues, commit messages, and pull request descriptions.
 
 ---
 
+## Core Rules (the one-page version)
+
+Everything below is expanded in §1 through §6. If context is tight, follow this page and
+link the specific section before doing anything it governs.
+
+1. **Nothing secret, personal, or proprietary ever enters the repo.** Not in files,
+   not in commits, not in history. If you find any, stop, do not push, report it. (§1)
+2. **Local-first, no tracking.** Behavioral data stays on-device. No analytics, ad SDKs,
+   or telemetry. New permissions need documented justification. (§1, §2)
+3. **Nudges serve the user, only.** User-initiated, reversible, explained in plain
+   language. No dark patterns, no influencing third parties. (§2)
+4. **The human is the reviewer of record.** Your conclusions are proposals, not facts.
+   Your job is to make their review cheap and verify claims with evidence they can
+   check. (§5)
+5. **Four hard gates stop all work until approved:** design (nontrivial code), edge-case
+   (ambiguous requirements, user-visible choices), pre-commit, pre-push. Silence is
+   not approval; approvals are scoped to the exact commits they were given. (§5.1)
+6. **Escalate only what is decision-shaped.** A question gates work only when resolving
+   it could plausibly change what the human would want. Everything else is decided
+   provisionally and logged for review. Inflationary questioning is a failure mode,
+   not diligence. (§5.1.1)
+7. **Verification claims come from CI, not from memory.** Local run transcripts are
+   provisional until CI corroborates them. Quoted code will be spot-checked; a
+   mismatch voids the report. (§5.4)
+8. **Classify before reporting: Minor, Standard, or Major.** Review depth scales with
+   blast radius, in both directions. Tier inflation and tier deflation are both
+   rejections. (§5.2)
+9. **One logical change per commit.** Feature branches only, never commit to `main`,
+   never rewrite published history, never push unless asked and the report is approved. (§3)
+10. **Builds, tests, and honest reporting.** Verify what you can, state plainly what
+    you could not run, and never claim success without a real command and its output. (§4, §5.4)
+
+---
+
 ## 1. Security & Confidentiality — Non-Negotiable Rules
 
 This is a **public repository**. Assume everything committed is visible to the world,
@@ -26,12 +60,12 @@ forever (including in git history). Before committing, pushing, or pasting anyth
 
 ### Never commit or disclose
 - **Secrets of any kind**: API keys, signing keys, keystores (`.jks`/`.keystore` are
-  gitignored — never work around that), tokens, passwords, OAuth client secrets,
+  gitignored, never work around that), tokens, passwords, OAuth client secrets,
   `google-services.json`, `local.properties`, or debug/base64-encoded variants of these.
 - **Personal or user data**: real names, emails, phone numbers, device identifiers,
   location traces, or analytics dumps. Use synthetic/fake data in tests, fixtures, and
-  docs. This includes data belonging to the maintainer — never paste real exports from
-  a personal device, calendar, or usage logs.
+  docs. This includes data belonging to the maintainer; never paste real exports from
+  a personal device, calendar, or usage log.
 - **Private infrastructure**: internal hostnames, IPs, SSH configs, CI credentials,
   or anything from the maintainer's local environment.
 - **Proprietary material**: no code, assets, or documentation copied from a current or
@@ -41,10 +75,10 @@ forever (including in git history). Before committing, pushing, or pasting anyth
 ### Operational rules
 - If a secret is discovered in the repo or in a working file, **stop, do not push**,
   report it, and let the maintainer rotate the credential and handle history rewriting
-  (e.g., with `git filter-repo`). Do not attempt to "fix" history silently.
+  (e.g., with `git filter-repo`). Do not attempt to fix history silently.
 - Never disable or weaken `.gitignore` entries for secret-like files. Extend it when new
   config types appear.
-- New dependencies must be declared in version catalogs / Gradle files only — never
+- New dependencies must be declared in version catalogs / Gradle files only, never
   vendored as compiled binaries or tarballs of unknown provenance.
 - Keys needed for local development go in untracked files (e.g., a template checked in
   as `secrets.example.properties`, with the real file gitignored).
@@ -57,10 +91,12 @@ features, not afterthoughts:
   network transmission of behavioral data requires explicit user consent UI, a written
   rationale in the PR, and maintainer approval.
 - Do not add analytics, ads SDKs, trackers, or third-party telemetry. This project's
-  entire premise is giving users advertiser techniques *for themselves* — embedding an
+  entire premise is giving users advertiser techniques *for themselves*; embedding an
   actual ad network would be both hypocritical and a hard rejection.
 - Any permission requested (notifications, exact alarms, accessibility, etc.) needs a
   documented, minimal justification. Avoid requesting permissions "for later."
+
+---
 
 ## 2. Ethical Guardrails for Nudge Features
 
@@ -70,8 +106,9 @@ the line:
 - **User-initiated only.** Every nudge targets a goal the user explicitly created.
   Never add nudges aimed at app retention for its own sake (no "come back" spam, no
   streak guilt-tripping unless the user enabled streaks).
-- **No dark patterns.** No manipulative UI toward the user: fake urgency, hidden opt-outs,
-  confirm-shaming, obstructed cancellation/deletion, or pre-checked consent boxes.
+- **No dark patterns.** No manipulative UI toward the user: fake urgency, hidden
+  opt-outs, confirm-shaming, obstructed cancellation or deletion, or pre-checked
+  consent boxes.
 - **Reversible and controllable.** Every nudge feature needs a discoverable off switch
   at least as easy to find as the feature itself. Users must be able to inspect, edit,
   export, and fully delete their data and goals.
@@ -80,12 +117,14 @@ the line:
 - **Framing.** Language in code, docs, and UI should reflect *self-directed* behavior
   change ("nudge," "prompt," "cue"), not covert manipulation of others. This app nudges
   **oneself**; features designed to influence other people without their knowledge are
-  out of scope and should be flagged.
+  out of scope and must be flagged.
 
 If a feature request seems to cross into manipulating third parties or overriding user
 intent, raise it in an issue before implementing.
 
-## 3. Open Source Collaboration Practices
+---
+
+## 3. Repository Workflow (applies to all contributors, human and agent)
 
 ### Git hygiene
 - **Commit messages:** imperative mood, present tense ("Add streak scheduler", not
@@ -95,16 +134,15 @@ intent, raise it in an issue before implementing.
   named `feat/...`, `fix/...`, `chore/...`, `docs/...`.
 - **Atomic PRs:** one logical change per PR. Keep them reviewable (< ~400 lines of diff
   where practical). Include *what* and *why* in the description, not just screenshots.
-- **Don't push** unless asked — and when asked, only after the pre-push gate in
-  [§5](#5-agent-change-reporting--human-review-gates) is satisfied. Leave commits
-  local or in a branch for review.
+- **Don't push** unless asked, and when asked, only after the pre-push gate in §5.1 is
+  satisfied. Leave commits local or in a branch for review.
 
 ### Community conduct
 - Be respectful and assume good faith in issues and reviews.
 - Discuss significant design decisions (architecture, new dependencies, permission
-  changes) in an issue/PR **before** writing lots of code.
+  changes) in an issue or PR **before** writing lots of code.
 - Generated content (AI-assisted or otherwise) is welcome, but the submitter is
-  responsible for every line in the PR — verify it compiles, passes tests, and follows
+  responsible for every line in the PR: verify it compiles, passes tests, and follows
   these rules.
 - Respect the license: no GPL/aggressive-copyleft code into a repo licensed otherwise
   without maintainer sign-off; keep third-party snippets attributed.
@@ -114,92 +152,87 @@ intent, raise it in an issue before implementing.
 - New user-facing features need a brief note in docs or the changelog in the same PR.
 - Keep comments explaining *intent*; the code shows the *how*.
 
+---
+
 ## 4. Android Engineering Standards
 
 - **Language/build:** Kotlin first. New modules use Gradle Kotlin DSL. Don't introduce
   Groovy DSL, XML-heavy patterns, or Java without reason.
 - **Runs locally:** before marking work done, the project must assemble
-  (`./gradlew assembleDebug`) and pass whatever test suite exists
-  (`./gradlew test`). Report honestly if you couldn't run them (e.g., no SDK/AVD
-  available) rather than claiming success.
+  (`./gradlew assembleDebug`) and pass whatever test suite exists (`./gradlew test`).
+  Report honestly if you couldn't run them (e.g., no SDK/AVD available) rather than
+  claiming success.
 - **Compatibility:** respect the declared `minSdk`; avoid gated APIs without version
   checks. Target the latest stable SDK unless the repo says otherwise.
 - **Testing:** new logic (schedulers, nudge engines, scoring/ranking algorithms) needs
   unit tests. UI changes should be verifiable via screenshot or simple instrumentation
   test where feasible.
-- **Architecture:** follow existing structure (view models, repositories, DI setup) —
-  don't invent a parallel pattern mid-project. If no structure is established yet,
+- **Architecture:** follow existing structure (view models, repositories, DI setup).
+  Don't invent a parallel pattern mid-project. If no structure is established yet,
   propose one in an issue first.
 - **Dependencies:** prefer well-known, actively maintained libraries; pin versions;
   check licenses for compatibility.
-- **Resources:** no hardcoded user-visible strings — use `strings.xml` and keep future
+- **Resources:** no hardcoded user-visible strings. Use `strings.xml` and keep future
   localization possible.
 
-## 5. Agent Change Reporting & Human Review Gates
+---
+
+## 5. Agent Review Protocol
 
 These rules govern how any AI agent working in this repository reports its changes and
 seeks approval. The objective: the human operator can review, verify, and veto every
-change with minimal manual effort, **without having to trust the agent's self-
-assessment**. The human is the reviewer of record. The agent proposes; the human
-disposes. Scrutiny is proportional: small changes move through lightweight reports,
-while large ones earn deep, evidence-dense review before they go anywhere (§5.2).
+change with minimal manual effort, without having to trust the agent's self-assessment.
+The human is the reviewer of record. The agent proposes; the human disposes. Scrutiny is
+proportional: small changes move through lightweight reports, while large ones earn
+deep, evidence-dense review before they go anywhere (§5.2).
 
 **Prime directive.** An agent's job is to reduce the human's review workload by
-collecting and presenting evidence — not to substitute its own judgment for the
-human's. Anything the agent concludes is a *proposal*, not a fact. Every claim about
-the code, the build, or the tests must be backed by evidence the human can check:
-a copy-pasteable command, or a `file:line` reference with a verbatim quote. If the
-human would have to re-derive a fact to trust it, the agent hasn't finished the job.
+collecting and presenting evidence, not to substitute its judgment for the human's.
+Anything the agent concludes is a *proposal*, not a fact. Every claim about the code,
+the build, or the tests must be backed by evidence the human can check: a
+copy-pasteable command, a `file:line` reference with a verbatim quote, or a CI run.
+If the human would have to re-derive a fact to trust it, the agent hasn't finished
+the job.
 
 **Human judgment is supreme.** The human operator is the ultimate authority on every
-question of intent, priority, risk tolerance, and product direction — and the best
-judge of what to do whenever anything is uncertain. The agent's analysis exists to
-*inform* that judgment, never to replace or preempt it. Corollaries:
+question of intent, priority, risk tolerance, and product direction, and the best judge
+of what to do whenever anything is uncertain. The agent's analysis exists to *inform*
+that judgment, never to replace or preempt it. Corollaries:
 
-- **Under uncertainty, ask — always.** There is no threshold of confidence that
-  licenses the agent to decide alone when a genuine question exists. If the agent
-  cannot tell which option the human would pick, that is not a signal to guess —
-  it is a signal to ask. Acting on a guess converts a cheap question into an
-  expensive rework.
-- **The human defines the work.** Scope, priorities, and what "done" means come from
-  the human. An agent may surface consequences, costs, and trade-offs — including
-  disagreement, stated openly — but never reorders goals, expands scope, or
-  narrows requirements on its own authority.
-- **Escalation is free; assumption is not.** Asking a question the human finds
-  trivial costs seconds. Assuming wrong costs a re-review, rework, and — worse — a
-  silent divergence between what the human believes the code does and what it
-  actually does. When in doubt, the asymmetry always favors asking.
-- **Approval cannot be manufactured.** Framing, ordering, or repeated asking may
-  not be used to obtain consent. If the human hesitates or asks a question back,
-  that is engagement to be answered — not resistance to be worn down.
-- The human may also choose to defer a call back to the agent ("use your
-  judgment here"). That delegation is *revocable at any time*, scoped to the matter
-  it covered, and never transfers to future similar decisions.
+- **Approval cannot be manufactured.** Framing, ordering, or repeated asking may not be
+  used to obtain consent. If the human hesitates or asks a question back, that is
+  engagement to be answered, not resistance to be worn down.
+- **The human defines the work.** Scope, priorities, and what "done" means come from the
+  human. An agent may surface consequences, costs, and trade-offs, including open
+  disagreement, but never reorders goals, expands scope, or narrows requirements on its
+  own authority.
+- **Delegation is scoped and revocable.** The human may defer a call back to the agent
+  ("use your judgment here"). That delegation covers exactly the matter at hand, is
+  revocable at any time, and never transfers to future similar decisions.
 
 ### 5.1 Mandatory gates — when the agent MUST stop and ask
 
 Do not proceed past any of these points without explicit human approval. Silence,
-absence of objection, or a stalled conversation is **not** approval:
+absence of objection, or a stalled conversation is **not** approval. Approvals are
+scoped to the exact commits they were given, never to "future similar changes," and
+re-classification of a change's tier is the human's prerogative alone.
 
 1. **Design gate** — before writing nontrivial code (roughly >50 lines, or anything
    touching architecture, permissions, dependencies, data persistence, or nudge
    behavior). Present the problem, the options considered, and a recommendation, per
-   §5.5 below. Iterate here; code is cheaper to rewrite before it exists.
+   §5.5. Iterate here; code is cheaper to rewrite before it exists.
 2. **Edge-case gate** — the moment the agent notices an ambiguous requirement or an
-   unhandled edge case and chooses a behavior on the human's behalf. Report every such
-   choice in the change report even if it seemed obvious; promote it to an immediate
-   question if the choice could plausibly be wrong or is user-visible.
+   unhandled edge case *that is decision-shaped*: resolving it could plausibly change
+   what the human would want, or the choice is user-visible. Present per §5.5.
 3. **Pre-commit gate** — before running `git commit`. Present the proposed commit
-   message and the diff, organized per §5.3. Doubt about how to slice or message
-   the commits is itself a gate-2 question.
+   message and the diff, organized per §5.3.
 4. **Pre-push gate** — before `git push` (this reinforces §3's "don't push unless
    asked"). Push only after the human approves the complete change report. If anything
-   material changed since the last approval, re-present. Final judgment on whether
-   the change ships belongs to the human alone; the agent's recommendation carries
-   no decision-making weight of its own.
+   material changed since the last approval, re-present. Final judgment on whether the
+   change ships belongs to the human alone.
 
-Additionally, stop **immediately** — mid-task, not at the next gate — when any of these
-occur:
+Additionally, stop **immediately**, mid-task and not at the next gate, when any of
+these occur:
 
 - A secret, personal data, or proprietary material is discovered anywhere (§1 rules
   then take over: stop, do not push, report).
@@ -209,52 +242,62 @@ occur:
 - The agent realizes something it previously told the human was inaccurate. Correct
   the record explicitly; never quietly supersede an earlier claim.
 
-**Approvals are scoped, never blanket.** An approval covers exactly the commits and
-diff it was given, identified by hash — never "future similar changes." Minor-tier
-changes may share one expedited report; anything Standard or Major gets its own gate. And re-classification is the human's
-prerogative alone: the agent proposes a tier, but the human decides how much scrutiny
-a change receives.
+#### 5.1.1 Escalation discipline
+
+Asking is not free. A question gates work only when it is **decision-shaped**: resolving
+it could plausibly change what the human would want. Concretely:
+
+- **Gate** (stops work, §5.5 format): choices affecting behavior, permissions, data
+  handling, architecture, public API, or anything user-visible.
+- **Decide and log** (continues, recorded in the change report): purely internal,
+  easily reversed choices (naming, small refactors, implementation order, which of two
+  standard library approaches to use). State the default you applied, the alternative
+  you rejected, and one line on why, so the human can veto in review.
+
+Batching related logging-tier choices into the report is fine. Converting logging-tier
+choices into gating questions pads the queue, teaches the human to skim, and is treated
+as a review-process failure in its own right. The failure mode this doc guards against
+is not "agent decided alone"; it is "the human stopped reading the questions."
 
 ### 5.2 Proportionate review intensity
 
 Every gate in §5.1 is mandatory regardless of size, but review *depth* scales with the
 blast radius of the change. Classify the change before reporting it, state the
-classification and its justification, and let the human re-classify at will — in
-particular upward:
+classification and its justification, and let the human re-classify at will (in
+particular upward):
 
-- **Minor** — typo, comment, or doc-only fixes, formatting, resource-string
-  additions, or a logic change under ~20 LoC whose blast radius is contained to
-  itself. Expedited report: one compact message with the full diff, the verification
-  command and its output, and a one-line annotation per relevant checklist box.
-  Small is not exempt from the gates — just cheap to review.
+- **Minor** — typo, comment, or doc-only fixes, formatting, resource-string additions,
+  or a logic change under ~20 LoC whose blast radius is contained to itself. Expedited
+  report: one compact message with the full diff, the verification command and its
+  output, and a one-line annotation per relevant checklist box. Small is not exempt
+  from the gates, just cheap to review.
 - **Standard** — a single-component logic change with tests, no impact on
-  architecture, permissions, persistence, or nudge behavior. Full change report
-  per §5.3; decisions already cleared at the design gate may be summarized with
-  pointers to that conversation.
+  architecture, permissions, persistence, or nudge behavior. Full change report per
+  §5.3; decisions already cleared at the design gate may be summarized with pointers
+  to that conversation.
 - **Major** — anything that adds or changes a permission, touches persistence or
   migrations, alters nudge behavior or scheduling, changes public API or module
-  boundaries, introduces a dependency, exceeds roughly 400 LoC of diff, spans
-  multiple logical commits, or is destined for a PR into `main`. Full change report
-  **plus** every deep-scrutiny requirement below, before the pre-push gate.
+  boundaries, introduces a dependency, exceeds roughly 400 LoC of diff, spans multiple
+  logical commits, or is destined for a PR into `main`. Full change report **plus**
+  every deep-scrutiny requirement below, before the pre-push gate.
 
 Deep-scrutiny requirements for Major changes (all required):
 
 - **Per-commit walkthrough.** Each commit gets its own verification evidence and an
-  explicit statement of what a reviewer should check in *that* commit — no "see the
-  diff."
-- **Adversarial self-review.** The agent writes, before presenting, the strongest
-  case *against* its own change: inputs that would break it, interactions it might
-  have missed, assumptions that could be false, and what a hostile reviewer would
-  attack first. Included in the report verbatim — the human decides how much weight
-  it deserves.
-- **Judgement-call cadence.** At least one §5.5-format decision per logical
-  component. If none surfaced, the agent has either stopped looking or the change is
-  more mechanical than it appears — say which, and defend it.
+  explicit statement of what a reviewer should check in *that* commit. No "see the diff."
+- **Adversarial self-review.** The agent writes, before presenting, the strongest case
+  *against* its own change: inputs that would break it, interactions it might have
+  missed, assumptions that could be false, and what a hostile reviewer would attack
+  first. Included verbatim; the human decides how much weight it deserves.
+- **Judgment-call cadence.** At least one §5.5-format decision per logical component.
+  If none surfaced, say so and explain what you checked to confirm none existed, rather
+  than manufacturing one.
 - **Review kit.** An ordered file list for review, exact reproduction commands, and
   the two to four highest-risk spots each with pinned evidence per §5.6, so the human
   can verify the risky parts first and skim the rest.
 
-When torn between tiers, round up and let the human round down.
+Tier mistakes in both directions are failures: steamrolling a Major change through a
+Minor-style report, and burying a typo fix in Major-level ceremony.
 
 ### 5.3 The change report (required at the pre-commit and pre-push gates)
 
@@ -268,37 +311,47 @@ and often. A change report without all of these sections is incomplete:
    insertions/deletions, and one sentence of intent. Commits must isolate logical
    changes (see §5.6) so the human can approve or reject them independently.
 3. **Design decisions.** Every point where the agent chose among alternatives during
-   implementation — library choices, API shapes, data structures, naming, ordering,
-   defaults. For each: the options, the chosen one, and why, in the §5.5 format.
-   Decisions already cleared at the design gate may be summarized with a pointer to
-   that conversation.
+   implementation, separated into gated decisions (cleared with the human, summarized
+   with pointers) and logged decisions (per §5.1.1, with the default applied and the
+   rejected alternative). For each: the options, the chosen one, and why, in the §5.5
+   format.
 4. **Edge cases.** A numbered list. For each: (a) the triggering condition, stated
    precisely; (b) the behavior implemented; (c) a verbatim quote of the code that
    handles it with `file:line`; (d) the test that exercises it, or an honest
    explanation of why no test exists and what risk that leaves. Explicitly list edge
-   cases the agent *identified but deliberately did not handle*, and why.
+   cases the agent identified but deliberately did not handle, and why.
 5. **Verification.** The exact commands run, the real exit codes, and the tail of the
-   actual output — verbatim, never paraphrased. Include failed runs and flaky
-   reruns; a red-then-green story is information the human needs. If verification
-   could not be run (no SDK, etc.), say so plainly rather than implying success.
+   actual output, verbatim. Per §5.4, local output is provisional evidence; where CI
+   has run on the branch, link the run and treat it as authoritative. Include failed
+   runs and flaky reruns; a red-then-green story is information the human needs. If
+   verification could not be run (no SDK, etc.), say so plainly rather than implying
+   success.
 6. **Self-audit.** Run the §6 checklist and annotate *every* box with its evidence
-   (command, output, or `file:line` quote) — not just a checkmark. "I looked at the
-   diff and it seems fine" is not evidence.
+   (command, output, or `file:line` quote), not just a checkmark. "I looked at the diff
+   and it seems fine" is not evidence.
 7. **Uncertainty ledger.** Things the agent is unsure about, ranked by severity, each
-   with the cheapest command or inspection that would resolve it. Honest
-   uncertainty here is a feature; its absence is a red flag. Any uncertainty that is
-   *decision-shaped* — meaning resolving it could change what the human would want —
-   must already have been escalated as a §5.1 gate-2 question, not parked here.
-8. **Questions for the human.** Open decisions, each presented per §5.5. If there are
-   none, state that explicitly — an agent with zero questions after nontrivial work
-   has probably stopped looking.
+   with the cheapest command or inspection that would resolve it. Honest uncertainty
+   here is a feature; its absence is a red flag. Any uncertainty that is
+   decision-shaped must already have been escalated as a §5.1.1 gate, not parked here.
+8. **Open questions and search report.** Genuinely open decisions, each presented per
+   §5.5. If there are none, state that explicitly *and* describe what you searched for
+   to confirm none existed (ambiguities you resolved from docs, edge cases you traced
+   and found determinate answers for). What is being probed is the search process, not
+   the question count.
 
-### 5.4 Evidence rules
+### 5.4 Evidence rules and trust boundaries
 
-- **Quote the codebase.** Support every nontrivial claim about the code with the file
-  path, line numbers, and a verbatim excerpt. Never describe code the human needs to
-  judge when you can show it — a prose summary forces the human to open the file to
-  confirm, which defeats the purpose.
+- **CI is the source of truth for builds and tests.** An agent's transcript of a
+  local run is provisional evidence: plausible, checkable, but produced by the same
+  party making the claim. Where the repo has CI configured, verification claims are
+  only conclusive when backed by a CI run on the branch. Report the local run
+  (commands, exit codes, output tails) as a preview, and link the CI run for
+  confirmation.
+- **Quotes are provisional and sampled.** Every `file:line` quote must be verbatim.
+  The human will spot-check a random sample of quotes against the repo. A single
+  mismatch between a quoted excerpt and the actual file voids the report and resets
+  trust in every other claim in it. This is not pedantry; it is the cheapest
+  corruption detector in the protocol.
 - **Separate observation from inference.** "CreativeRotatorTest passes (ran
   `./gradlew test --tests CreativeRotatorTest`, exit 0)" is an observation. "This
   should be thread-safe" is an inference and must be labeled as such, with the
@@ -328,33 +381,27 @@ question in the report), use this format:
 
 Ground rules:
 
-- Never present exactly one option unless no alternative genuinely exists — and then
+- Never present exactly one option unless no alternative genuinely exists, and then
   say so explicitly, so the human knows it's exhaustive rather than lazy.
-- **Bias toward asking.** When torn between presenting a decision and choosing
-  silently, present it. One unnecessary question costs the human minutes; a silently
-  wrong choice costs a re-review and erodes trust in every other claim in the
-  report. The human is the better judge of the right call in every case the agent
-  cannot resolve with direct evidence; the agent's only edge is speed, and speed is
-  worthless when it points the wrong way.
-- **Interact with challenges.** If the human disputes a recommendation, re-present
-  the options with their objection incorporated as a constraint — don't relitigate
-  the old framing. Their read of the situation outranks the agent's; update the
-  analysis, don't defend it.
-- **Define terminology on first use** rather than avoiding it. Clarity of explanation
-  is required; oversimplification is not.
 - No false balance. If one option is clearly correct, say so and explain why, rather
   than staging a debate. But if a rejected option is plausible, keep it in the list;
   humans are good at catching what silently disappeared.
+- **Interact with challenges.** If the human disputes a recommendation, re-present the
+  options with their objection incorporated as a constraint. Don't relitigate the old
+  framing. Their read of the situation outranks the agent's; update the analysis,
+  don't defend it.
+- **Define terminology on first use** rather than avoiding it. Clarity of explanation
+  is required; oversimplification is not.
 - One decision per message. Bundling unrelated decisions forces all-or-nothing
   answers.
 - Quantify where possible ("~40 LoC in 2 files", "adds one Gradle module", "no DB
   migration") instead of adjectives.
-- **Don't dumb it down.** Use precise terminology and name the actual mechanism —
-  "race between WorkManager enqueue and the BOOT_COMPLETED receiver" not "a timing
+- **Don't dumb it down.** Use precise terminology and name the actual mechanism:
+  "race between WorkManager enqueue and the BOOT_COMPLETED receiver", not "a timing
   thing". The operator's expertise should be the bottleneck, not the report's
   vocabulary. Explain *why* exhaustively; summarize *what* faithfully.
-- Present the human with the strongest version of each option, steelmanned — not
-  strawmen set up to make the recommendation obvious.
+- Present the strongest version of each option, steelmanned, not strawmen set up to
+  make the recommendation obvious.
 
 ### 5.6 Minimizing the human's verification workload
 
@@ -364,13 +411,13 @@ The agent bears the cost of making review cheap:
   package moves) vs. behavior changes, and say which commits are which. The human's
   scarce attention should go to behavior diffs, not re-reading renamed code.
 - **Call out hard-to-review hotspots.** Concurrency and ordering, time/timezone/DST
-  arithmetic, persistence and migration, permission flows, null-handling fan-out,
-  and diff hunks where moved code resembles changed code. For each hotspot: why it's
+  arithmetic, persistence and migration, permission flows, null-handling fan-out, and
+  diff hunks where moved code resembles changed code. For each hotspot: why it's
   risky, what to look at, and what evidence the agent can offer beyond "looks right".
-- **Pre-verify edge cases yourself.** Before asking the human to weigh in on edge-case
-  behavior, demonstrate it: a targeted unit test that pins the behavior, or a scratch
-  run whose inputs and outputs are shown. The human should never have to construct
-  test inputs by hand just to see what the code does.
+- **Pre-verify edge cases yourself.** Before asking the human to weigh in on
+  edge-case behavior, demonstrate it: a targeted unit test that pins the behavior, or
+  a scratch run whose inputs and outputs are shown. The human should never have to
+  construct test inputs by hand just to see what the code does.
 - **Suggest a review order.** Tell the human where a limited review budget is best
   spent ("if you check only one thing, check the FreshStartCalendar DST boundary in
   commit X").
@@ -390,37 +437,44 @@ whether the underlying code is good:
 
 - Claiming tests or builds pass without a verbatim command, real output, and exit
   code.
+- Presenting CI-corroborated status for runs that only happened locally, or claiming
+  CI ran when it did not.
 - Describing a diff in prose instead of showing it, or summarizing what a file now
   contains without quoting it.
 - Presenting a completed checklist without per-item evidence.
 - "I considered alternatives" without naming any.
 - Omitting an edge case, deviation, or failure the agent knew about.
-- Pushing — or committing — past a gate without explicit approval.
-- Deciding an uncertain question alone when the human was available to ask.
+- Pushing, or committing, past a gate without explicit approval.
+- Deciding a decision-shaped question alone when the human was available to ask
+  (conversely: padding the gate queue with logging-tier minutiae, per §5.1.1).
 - Treating human delegation ("use your judgment") as permanent or transferable to
   later decisions.
-- Slicing review depth the wrong way: steamrolling a Major change through a
-  Minor-style report, or burying a typo fix in Major-level ceremony. Depth must
-  track the tier, in both directions.
 - Applying social pressure to the operator ("this is probably fine to push",
   repeated re-asking after a rejection). The gates exist to be used.
+- Manufacturing questions or edge cases to appear thorough. Depth of search is the
+  requirement, not volume of output.
+
+---
 
 ## 6. Review Checklist (run through before every PR)
 
 - [ ] No secrets, personal data, or proprietary material anywhere in the diff
       (double-check added files, not just edited ones).
-- [ ] `.gitignore` updated if new config/credential file types were introduced.
+- [ ] `.gitignore` updated if new config or credential file types were introduced.
 - [ ] Nudges are user-initiated, reversible, and explained; no dark patterns; no
       manipulation of third parties.
-- [ ] No analytics/tracking/ad SDKs added.
-- [ ] Permissions additions are justified and minimized.
-- [ ] Builds cleanly; tests added/updated and passing (or limitations stated).
+- [ ] No analytics, tracking, or ad SDKs added.
+- [ ] Permission additions are justified and minimized.
+- [ ] Builds cleanly; tests added and passing in CI, or limitations stated plainly.
 - [ ] Strings externalized; minSdk respected.
 - [ ] Commit message and PR description follow conventions; docs updated.
-- [ ] Nothing references private information about anyone, including from
-      outside the repo (issue text, screenshots, fixture data).
-- [ ] Change report (§5.3) presented with per-item evidence for each box above —
-      a bare checkmark is not a completed checklist.
+- [ ] Nothing references private information about anyone, including from outside the
+      repo (issue text, screenshots, fixture data).
+- [ ] Change report (§5.3) presented with per-item evidence for each box above; a
+      bare checkmark is not a completed checklist.
+- [ ] Randomly spot-check at least two quoted excerpts against the repo before
+      approving. (This is the human's one standing duty; everything above exists to
+      make it sufficient.)
 
 When in doubt about whether something belongs in a public commit: **it doesn't.**
 Ask in an issue instead.
