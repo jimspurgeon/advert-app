@@ -11,6 +11,11 @@ issues, commit messages, and pull request descriptions.
   techniques from the advertising industry and turns them toward user-chosen goals.
 - **License:** See [LICENSE](LICENSE). All contributions are made under that license.
 - **Repo:** https://github.com/jimspurgeon/advert-app
+- **Plan & workflow:** [DEVELOPMENT.md](DEVELOPMENT.md) is the canonical product plan,
+  architecture, and branching strategy. **Read it before working on anything.**
+- **Evidence:** [docs/research/](docs/research/README.md) is the research library that
+  justifies design decisions. Features cite it; check it before proposing
+  behavior-affecting changes.
 
 ---
 

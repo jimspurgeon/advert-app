@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Gradle wrapper validation
+        uses: gradle/actions/setup-gradle@v4
+
+      # Unit tests (JVM). Android instrumented tests run on the maintainer's
+      # machine until an emulator-in-CI budget is justified.
+      - name: Unit tests
+        run: ./gradlew test --console=plain
+
+      - name: Assemble debug
+        run: ./gradlew assembleDebug --console=plain
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Static analysis
+        run: ./gradlew ktlintCheck detekt --console=plain
+        continue-on-error: true   # advisory until Phase 0 exits
