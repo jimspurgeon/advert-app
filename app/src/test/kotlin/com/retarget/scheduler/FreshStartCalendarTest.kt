@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ * Retarget — turning advertising's own toolbox toward your goals.
+ * Copyright (C) 2026 Jim Spurgeon. For license text see LICENSE.
+ */
+
 package com.retarget.scheduler
 
 import org.junit.Assert.assertEquals
