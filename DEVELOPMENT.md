@@ -184,13 +184,20 @@ milestone) → write code + tests → PR against the checklist.
 
 ## Build & Run (Phase 0 onward)
 
-Requirements: JDK 17+, Android SDK (compileSdk 35, minSdk 26 — pre-WorkManager-quirks
+Requirements: JDK 17+, Android SDK (compileSdk 37, minSdk 26 — pre-WorkManager-quirks
 baseline for modern scheduling reliability), Gradle wrapper.
 
 ```
 ./gradlew assembleDebug
 ./gradlew test
 ```
+
+Toolchain notes (verified 2026-10): Gradle 9.8.0, AGP 9.4.1 (built-in Kotlin — no
+separate kotlin-android plugin), KSP 2.3.12, Hilt 2.60.1, Compose BOM 2026.09.00.
+Builds fine on JDK 17 (Temurin, what CI uses) and on Android Studio's JBR 25 for
+assemble/test; detekt's bundled analyzer chokes on JDK 25, so run `detekt` under
+JDK 17. Copy `local.properties.template` to `local.properties` (gitignored) and
+set your SDK path before first build.
 
 Repositories: GitHub `jimspurgeon/retarget`. Issues and PRs only; no email patches.
 

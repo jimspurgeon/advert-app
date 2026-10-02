@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Launcher glyph: concentric retargeting rings around a center dot — the app's
+  "aim persuasion at your own goals" identity in one mark.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- outer ring -->
+    <path
+        android:pathData="M54,30a24,24 0 1,0 0.001,0z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:fillColor="#00000000" />
+    <!-- middle ring -->
+    <path
+        android:pathData="M54,40a14,14 0 1,0 0.001,0z"
+        android:strokeColor="#A5D6A7"
+        android:strokeWidth="4"
+        android:fillColor="#00000000" />
+    <!-- bullseye dot -->
+    <path
+        android:pathData="M54,49a5,5 0 1,0 0.001,0z"
+        android:fillColor="#FFFFFF" />
+</vector>
