@@ -25,6 +25,7 @@ Network is used ONLY by this dev script, never by the app.
 import argparse
 import hashlib
 import json
+import io
 import os
 import re
 import shutil
@@ -32,6 +33,12 @@ import subprocess
 import sys
 import urllib.parse
 import urllib.request
+
+# Windows consoles default to cp1252; photographer names are international.
+# Force UTF-8 on stdout/stderr so a name like "João" can't crash the pipeline.
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS_DIR = os.path.join(REPO_ROOT, "app", "src", "main", "assets", "creative-packs")
@@ -242,7 +249,8 @@ def fetch_pack(theme_id, keywords, count, key, ledger, dry_run=False):
     if not dry_run and added:
         manifest["images"].sort(key=lambda im: im["unsplashId"])
         with open(manifest_path, "w", encoding="utf-8", newline="\n") as fh:
-            json.dump(manifest, fh, indent=2, newline="\n")
+            json.dump(manifest, fh, indent=2)
+            fh.write("\n")  # trailing newline for POSIX-friendly diffs
             fh.write("\n")
         save_ledger(ledger)
     print(f"[{theme_id}] done: {added} added, pack now {len(manifest['images'])}")
