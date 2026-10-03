@@ -20,10 +20,10 @@ jobs:
       - name: Gradle wrapper validation
         uses: gradle/actions/setup-gradle@v4
 
-      # Unit tests (JVM). Android instrumented tests run on the maintainer's
-      # machine until an emulator-in-CI budget is justified.
-      - name: Unit tests
-        run: ./gradlew test --console=plain
+      # Unit tests (JVM) + creative license gate. Android instrumented tests
+      # run on the maintainer's machine until an emulator-in-CI budget is justified.
+      - name: Unit tests + creative license gate
+        run: ./gradlew :app:testDebugUnitTest :app:checkCreativeLicenses --console=plain
 
       - name: Assemble debug
         run: ./gradlew assembleDebug --console=plain
