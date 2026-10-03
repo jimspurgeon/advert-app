@@ -108,13 +108,36 @@ palettes, tidy serene spaces, hands around warm mugs, sunset walks.
 - Text-in-image (scales poorly across languages and wallpaper crops; keep copy in
   notification body instead)
 
-## Sourcing pipeline (initial packs)
+## Sourcing pipeline (shipped approach — dev-side curation, offline app)
 
-- CC0 libraries: Unsplash (check license), Pexels, Pixabay; Wikimedia Commons; NASA
-  image library for nature/space where relevant.
+- The app is 100% offline: creatives are fetched **at development time** by
+  `scripts/fetch_creatives.py`, committed to the repo, and bundled into the APK.
+  No network permission exists; no API key ever ships.
+- Unsplash is the primary source (top-ranked by search relevance, portrait
+  orientation, ≥1600px source, re-encoded to 1440px long-edge JPEG q78).
 - Verify license per image at ingest; store attribution + license URL in the pack's
-  manifest (JSON). Keep manifests in-repo.
-- All remote API use must respect the API's ToS and rate limits, cache aggressively,
-  and degrade gracefully when offline. Remote-fetch features must be opt-in and
-  must respect user privacy (no personal data leaves the device; API keys are
-  user-supplied or absent — favor keyless endpoints like Openverse).
+  manifest (JSON). Manifests live in-repo; `./gradlew :app:checkCreativeLicenses`
+  fails the build on any missing field, duplicate Unsplash ID, or missing file.
+- **Never-ship-twice rule:** `.creative-ledger.json` records every shipped photo ID
+  forever. Quarterly refreshes draw only from never-before-shipped photos.
+
+### Pack size derivation (forgetting-curve budget)
+
+First-release target: **60 images per category**. Wallpaper exposure decays
+approximately exponentially (Ebbinghaus form `R = e^(-t/S)`); a repeat feels fresh
+when retention drops below conscious noticing (~R < 0.5, i.e. t > 0.69·S).
+
+| Image salience | S (days) |
+|---|---|
+| Low-salience glance | ~7 |
+| Distinctive photo (golden hour, vivid) | ~14 |
+| Highly memorable "wow" shot | ~30 |
+
+Worst case is the hydration preset at 4 wallpapers/day: N images give cycle time
+N/4 days. At N=60, cycle = 15 days → R = e^(-15/14) ≈ 34% for distinctive shots
+(fresh), and the rotator's fatigue-aware selection plus deck-reshuffle guard
+(no repeat within a shuffled deck) extends effective gaps further. Below ~40,
+mid-salience images repeat while still consciously recognized; 60 is the knee of
+the curve. Quarterly expansions compound the effect over the app's lifetime.
+APK cost: ~60 images ≈ 15–20 MB per category (1440px JPEGs), well inside the
+Play AAB base limit.
