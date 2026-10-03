@@ -6,9 +6,9 @@
 
 package com.retarget.goal
 
-import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Test
 
 /**
  * Preset catalog conformance: the tone guide (docs/research/tone-guide.md §5)
@@ -16,7 +16,6 @@ import org.junit.Assert.assertTrue
  * here, the resolution is a guide amendment — never a validator weakening.
  */
 class PresetCatalogTest {
-
     private val catalog = PresetCatalog.ALL
 
     @Test
@@ -64,18 +63,33 @@ class PresetCatalogTest {
 
     @Test
     fun `every copy line references an approved tone pattern`() {
-        val approved = (1..20).map { n ->
-            val titles = mapOf(
-                1 to "Minimalist Confidence", 2 to "Absurd Boast", 3 to "Luxury Repositioning",
-                4 to "Corporate Synergy", 5 to "Call-to-Action Parody", 6 to "Sensory Close-Up",
-                7 to "Heritage/Nostalgia Brand", 8 to "New Product Launch", 9 to "Testimonial Parody",
-                10 to "Fine Print Joke", 11 to "Sponsorship Parody", 12 to "Mascot Wisdom",
-                13 to "Underpromise", 14 to "Lifestyle Integration", 15 to "Elegant Minimalism",
-                16 to "As-Seen-On-TV", 17 to "Comparative Ad", 18 to "Seasonal Campaign",
-                19 to "Infomercial Problem-Solution", 20 to "Milestone Celebration",
-            )
-            "3.$n ${titles[n]}"
-        }
+        val approved =
+            (1..20).map { n ->
+                val titles =
+                    mapOf(
+                        1 to "Minimalist Confidence",
+                        2 to "Absurd Boast",
+                        3 to "Luxury Repositioning",
+                        4 to "Corporate Synergy",
+                        5 to "Call-to-Action Parody",
+                        6 to "Sensory Close-Up",
+                        7 to "Heritage/Nostalgia Brand",
+                        8 to "New Product Launch",
+                        9 to "Testimonial Parody",
+                        10 to "Fine Print Joke",
+                        11 to "Sponsorship Parody",
+                        12 to "Mascot Wisdom",
+                        13 to "Underpromise",
+                        14 to "Lifestyle Integration",
+                        15 to "Elegant Minimalism",
+                        16 to "As-Seen-On-TV",
+                        17 to "Comparative Ad",
+                        18 to "Seasonal Campaign",
+                        19 to "Infomercial Problem-Solution",
+                        20 to "Milestone Celebration",
+                    )
+                "3.$n ${titles[n]}"
+            }
         catalog.flatMap { it.copyLines }.forEach { line ->
             assertTrue(
                 "\"${line.text}\" cites unapproved pattern '${line.tonePattern}'",
@@ -100,17 +114,26 @@ class PresetCatalogTest {
 
     @Test
     fun `no copy line trips the anti-pattern keyword wire`() {
-        val tripwire = listOf(
-            "should", "don't break", "last chance", "limited time", "only ", "left",
-            "danger", "risk of", "guilty", "shame",
-        )
+        val tripwire =
+            listOf(
+                "should",
+                "don't break",
+                "last chance",
+                "limited time",
+                "only ",
+                "left",
+                "danger",
+                "risk of",
+                "guilty",
+                "shame",
+            )
         catalog.flatMap { it.copyLines }.forEach { line ->
             val lower = line.text.lowercase()
             tripwire.forEach { kw ->
                 assertTrue(
-                "\"${line.text}\" contains anti-pattern keyword '$kw' (tone-guide.md §4)",
-                !lower.contains(kw),
-            )
+                    "\"${line.text}\" contains anti-pattern keyword '$kw' (tone-guide.md §4)",
+                    !lower.contains(kw),
+                )
             }
         }
     }
