@@ -14,9 +14,9 @@ Guarantees (issue #4):
     validation before writing.
 
 Usage:
-    python scripts/fetch_creatives.py --theme fresh-air --count 60
-    python scripts/fetch_creatives.py --all --count 60   # every catalog preset
-    python scripts/fetch_creatives.py --validate          # validate packs only
+    python scripts/fetch_creatives.py --theme fresh-air
+    python scripts/fetch_creatives.py --all         # every catalog preset
+    python scripts/fetch_creatives.py --validate     # validate packs only
 
 Requires: secrets.properties with UNSPLASH_ACCESS_KEY (see template).
 Network is used ONLY by this dev script, never by the app.
@@ -163,7 +163,8 @@ def slugify_theme(theme_id):
     return theme_id.replace("-", "_")
 
 
-def fetch_pack(theme_id, keywords, count, key, ledger, dry_run=False):
+def fetch_pack(theme_id, keywords_with_quotas, key, ledger, dry_run=False):
+    """Fetch images with per-sub-theme quotas. keywords_with_quotas: list of (term, quota) tuples."""
     pack_dir = os.path.join(ASSETS_DIR, slugify_theme(theme_id))
     os.makedirs(pack_dir, exist_ok=True)
     manifest_path = os.path.join(pack_dir, "manifest.json")
@@ -175,83 +176,87 @@ def fetch_pack(theme_id, keywords, count, key, ledger, dry_run=False):
             manifest = json.load(fh)
     have = {img["unsplashId"] for img in manifest["images"]}
     shipped = set(ledger.keys())
-    needed = count - len(have)
-    print(f"[{theme_id}] have {len(have)}, target {count}, fetching {max(0, needed)}")
+    target = sum(q for _, q in keywords_with_quotas)
+    print(f"[{theme_id}] have {len(have)}, target {target}, shipped-ever {len(shipped)}")
 
-    candidates = []
-    for query in keywords:
+    # Sub-theme quotas drive diversity; each (term, quota) fills its own slot.
+    # (Query loop lives in the per-photo section below.)
+
+    added = 0
+    for query, quota in keywords_with_quotas:
+        sub_added = 0
         page = 1
-        while len(candidates) < needed + 40 and page <= 5:  # margin for rejections
+        attempts = 0
+        while sub_added < quota and attempts < 12:
+            attempts += 1
             results = search_photos(key, query, page)
             if not results:
                 break
-            candidates.extend(results)
             page += 1
-
-    added = 0
-    for photo in candidates:
-        if added >= needed:
-            break
-        pid = photo["id"]
-        if pid in have or pid in shipped:
-            continue
-        user = photo.get("user") or {}
-        username = user.get("name") or user.get("username")
-        if not username:
-            print(f"  skip {pid}: no photographer attribution (pack integrity rule)")
-            continue
-        urls = photo.get("urls") or {}
-        raw_url = urls.get("raw")
-        if not raw_url:
-            continue
-        w, h = photo.get("width", 0), photo.get("height", 0)
-        if max(w, h) < MIN_SOURCE_LONG_EDGE:
-            continue
-        tmp_src = os.path.join(pack_dir, f".tmp_{pid}_src.jpg")
-        dest = os.path.join(pack_dir, f"{pid}.jpg")
-        if dry_run:
-            print(f"  would fetch {pid} by {username}")
-            added += 1
-            continue
-        # Request the pre-sized variant: imgix params on the raw URL.
-        sized = f"{raw_url}&w={TARGET_LONG_EDGE}&q={JPEG_QUALITY}&fm=jpg&fit=max"
-        try:
-            download_file(sized, dest)
-        except Exception as exc:  # noqa: BLE001
-            print(f"  skip {pid}: download failed ({exc})")
-            continue
-        # Verify dimensions from actual bytes; trust nothing from the API.
-        try:
-            rw, rh = longest_edge(dest)
-        except Exception:
-            os.remove(dest)
-            continue
-        if max(rw, rh) < TARGET_LONG_EDGE * 0.9:
-            os.remove(dest)
-            continue
-        file_hash = hashlib.sha256(open(dest, "rb").read()).hexdigest()
-        manifest["images"].append({
-            "unsplashId": pid,
-            "file": f"{pid}.jpg",
-            "photographer": username,
-            "photographerUrl": f"https://unsplash.com/@{user.get('username', '')}",
-            "license": photo.get("links", {}).get("license", "Unsplash License"),
-            "licenseUrl": "https://unsplash.com/license",
-            "sourceUrl": urls.get("html", f"https://unsplash.com/photos/{pid}"),
-            "width": rw,
-            "height": rh,
-            "sha256": file_hash,
-        })
-        ledger[pid] = theme_id
-        added += 1
-        print(f"  fetched {pid} ({rw}x{rh}) by {username}")
+            for photo in results:
+                if sub_added >= quota:
+                    break
+                pid = photo["id"]
+                if pid in have or pid in shipped:
+                    continue
+                user = photo.get("user") or {}
+                username = user.get("name") or user.get("username")
+                if not username:
+                    print(f"  skip {pid}: no photographer attribution (pack integrity rule)")
+                    continue
+                urls = photo.get("urls") or {}
+                raw_url = urls.get("raw")
+                if not raw_url:
+                    continue
+                w, h = photo.get("width", 0), photo.get("height", 0)
+                if max(w, h) < MIN_SOURCE_LONG_EDGE:
+                    continue
+                tmp_src = os.path.join(pack_dir, f".tmp_{pid}_src.jpg")
+                dest = os.path.join(pack_dir, f"{pid}.jpg")
+                if dry_run:
+                    print(f"  would fetch {pid} by {username}")
+                    sub_added += 1
+                    continue
+                # Request the pre-sized variant: imgix params on the raw URL.
+                sized = f"{raw_url}&w={TARGET_LONG_EDGE}&q={JPEG_QUALITY}&fm=jpg&fit=max"
+                try:
+                    download_file(sized, dest)
+                except Exception as exc:  # noqa: BLE001
+                    print(f"  skip {pid}: download failed ({exc})")
+                    continue
+                # Verify dimensions from actual bytes; trust nothing from the API.
+                try:
+                    rw, rh = longest_edge(dest)
+                except Exception:
+                    os.remove(dest)
+                    continue
+                if max(rw, rh) < TARGET_LONG_EDGE * 0.9:
+                    os.remove(dest)
+                    continue
+                file_hash = hashlib.sha256(open(dest, "rb").read()).hexdigest()
+                manifest["images"].append({
+                    "unsplashId": pid,
+                    "file": f"{pid}.jpg",
+                    "subTheme": query,
+                    "photographer": username,
+                    "photographerUrl": f"https://unsplash.com/@{user.get('username', '')}",
+                    "license": photo.get("links", {}).get("license", "Unsplash License"),
+                    "licenseUrl": "https://unsplash.com/license",
+                    "sourceUrl": urls.get("html", f"https://unsplash.com/photos/{pid}"),
+                    "width": rw,
+                    "height": rh,
+                    "sha256": file_hash,
+                })
+                ledger[pid] = theme_id
+                sub_added += 1
+                added += 1
+                print(f"  fetched {pid} [{query}] ({rw}x{rh}) by {username}")
 
     if not dry_run and added:
         manifest["images"].sort(key=lambda im: im["unsplashId"])
         with open(manifest_path, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(manifest, fh, indent=2)
             fh.write("\n")  # trailing newline for POSIX-friendly diffs
-            fh.write("\n")
         save_ledger(ledger)
     print(f"[{theme_id}] done: {added} added, pack now {len(manifest['images'])}")
     return added
@@ -303,7 +308,6 @@ def main():
     g.add_argument("--theme", help="catalog preset id, e.g. fresh-air")
     g.add_argument("--all", action="store_true", help="fetch for all catalog presets")
     g.add_argument("--validate", action="store_true", help="validate packs, no network")
-    ap.add_argument("--count", type=int, default=60, help="images per pack (default 60)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -317,23 +321,62 @@ def main():
         print("Validation passed.")
         return
 
-    # Theme keywords mirror PresetCatalog.imageKeywords (kept in sync manually;
-    # checkCreativeLicenses CI gate asserts they match).
-    THEME_KEYWORDS = {
-        "hydration": ["water glass", "drinking water", "river stream"],
-        "fresh-air": ["sunlight forest", "golden hour field", "mountain morning"],
-        "fruit": ["fresh fruit bowl", "ripe peaches", "berry market"],
-        "vegetables": ["fresh vegetables", "farmers market greens", "colorful salad"],
+    # Per-sub-theme quotas replace flat keyword lists: each (search term, quota)
+    # pair guarantees its slice of the pack. Terms target high-potency imagery
+    # archetypes per docs/research/imagery-domains.md (awe + soft fascination,
+    # down-regulation rather than adrenaline). Target 60+/pack: quotas sum
+    # slightly above 60 for fresh-air because sub-theme diversity beats a
+    # rigid count; undershoots on availability are acceptable.
+    # (forgetting-curve rationale in docs/research/imagery-domains.md).
+    THEME_QUOTAS = {
+        "hydration": [
+            ("sparkling water pour glass", 12),
+            ("mountain stream waterfall", 10),
+            ("ocean wave splash", 10),
+            ("morning dew drop macro", 9),
+            ("blue texture water ripple", 9),
+            ("citrus infused water", 10),
+        ],
+        "fresh-air": [
+            ("misty mountain peaks layers", 7),
+            ("golden hour meadow grass backlight", 6),
+            ("calm lake reflection dawn", 6),
+            ("wispy clouds open sky", 5),
+            ("coastal cliff ocean breeze", 6),
+            ("forest path dappled light", 6),
+            ("macro dew leaf morning", 5),
+            ("desert dune minimal", 5),
+            ("starry night sky stars", 5),
+            ("snowy summit ridge", 5),
+            ("waterfall moss grotto", 5),
+            ("rolling hills pasture fog", 5),
+        ],
+        "fruit": [
+            ("ripe peaches close-up", 10),
+            ("berry macro water droplets", 10),
+            ("citrus slices vibrant", 10),
+            ("watermelon splash summer", 8),
+            ("orchard harvest sunlight", 10),
+            ("dragon fruit exotic macro", 12),
+        ],
+        "vegetables": [
+            ("farmers market vegetable stall", 10),
+            ("heirloom tomato close-up", 10),
+            ("garden harvest basket", 10),
+            ("leafy greens texture macro", 8),
+            ("market peppers rainbow", 10),
+            ("artisan salad bowl", 12),
+        ],
     }
 
-    themes = list(THEME_KEYWORDS.keys()) if args.all else [args.theme]
-    if args.theme and args.theme not in THEME_KEYWORDS:
-        sys.exit(f"Unknown theme '{args.theme}'. Known: {', '.join(THEME_KEYWORDS)}")
+    themes = list(THEME_QUOTAS.keys()) if args.all else [args.theme]
+    if args.theme and args.theme not in THEME_QUOTAS:
+        sys.exit(f"Unknown theme '{args.theme}'. Known: {', '.join(THEME_QUOTAS)}")
 
     key = load_secrets()
     ledger = load_ledger()
     for theme in themes:
-        fetch_pack(theme, THEME_KEYWORDS[theme], args.count, key, ledger, args.dry_run)
+        fetch_pack(theme, THEME_QUOTAS[theme], key, ledger, args.dry_run)
     errs = validate_packs()
     if errs:
         print("POST-FETCH VALIDATION FAILED:")
