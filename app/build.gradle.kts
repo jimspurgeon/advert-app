@@ -109,6 +109,7 @@ abstract class CheckCreativeLicensesTask : DefaultTask() {
                 return@forEach
             }
             val manifest = groovy.json.JsonSlurper().parse(manifestFile) as Map<*, *>
+
             @Suppress("UNCHECKED_CAST")
             val images = (manifest["images"] as? List<Map<String, Any?>>) ?: emptyList()
             for (img in images) {
